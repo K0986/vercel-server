@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SVC3 Control Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        .status {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: #333;
+            word-wrap: break-word;
+        }
+        .button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            width: calc(100% - 8px);
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .button:active {
+            background-color: #3d8b40;
+        }
+        .button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+        .connected {
+            background-color: #4CAF50;
+        }
+        .disconnected {
+            background-color: #f44336;
+        }
+        .button-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .server-info {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #888;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 5px;
+            }
+            .button {
+                padding: 12px 24px;
+                font-size: 14px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+        }
+        @media (max-width: 400px) {
+            .button {
+                padding: 10px 20px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="connection-status" class="connection-status disconnected">
+            Disconnected
+        </div>
+        
+        <h1>SVC3 Control Panel</h1>
+        
+        <div class="server-info" id="server-info">
+            Connecting to server...
+        </div>
+        
+        <div class="status" id="status-message">
+            Waiting for connection...
+        </div>
+
+        <div class="button-container">
+            <button class="button" onclick="sendCommand('AIMBOT_DRAG')">Aimbot Drag</button>
+            <button class="button" onclick="sendCommand('AIMBOT_TOGGLE')">Aimbot On/Off</button>
+            <button class="button" onclick="sendCommand('SNIPER_SCOPE')">Sniper Scope</button>
+            <button class="button" onclick="sendCommand('SNIPER_QUICK_SWITCH')">Sniper Quick Switch</button>
+            <button class="button" onclick="sendCommand('M82B_LOCATION')">M82b Location</button>
+            <button class="button" onclick="sendCommand('CHAMS_MENU')">Chams Menu</button>
+        </div>
+    </div>
+
+    <script>
+        let socket;
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 5;
+        const serverHost = window.location.hostname;
+        const serverPort = window.location.port || 5000;
+
+        function updateServerInfo() {
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            document.getElementById('server-info').textContent = 
+                `Connected to ${wsProtocol}//${serverHost}:${serverPort}`;
+        }
+
+        function connect() {
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${wsProtocol}//${serverHost}:${serverPort}/ws`;
+            
+            socket = new WebSocket(wsUrl);
+            
+            socket.onopen = function() {
+                document.getElementById('connection-status').className = 'connection-status connected';
+                document.getElementById('connection-status').textContent = 'Connected';
+                document.getElementById('status-message').textContent = 'Connected to client';
+                reconnectAttempts = 0;
+                updateServerInfo();
+            };
+
+            socket.onclose = function() {
+                document.getElementById('connection-status').className = 'connection-status disconnected';
+                document.getElementById('connection-status').textContent = 'Disconnected';
+                document.getElementById('status-message').textContent = 'Disconnected from client';
+                
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    setTimeout(connect, 2000);
+                }
+            };
+
+            socket.onmessage = function(event) {
+                document.getElementById('status-message').textContent = event.data;
+            };
+
+            socket.onerror = function(error) {
+                console.error('WebSocket error:', error);
+                document.getElementById('status-message').textContent = 'Connection error occurred';
+            };
+        }
+
+        function sendCommand(command) {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(command);
+            } else {
+                document.getElementById('status-message').textContent = 'Not connected to client';
+            }
+        }
+
+        // Connect when the page loads
+        window.onload = function() {
+            connect();
+            updateServerInfo();
+        };
+
+        // Prevent double-tap zoom on mobile
+        document.addEventListener('dblclick', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+    </script>
+</body>
+</html> 

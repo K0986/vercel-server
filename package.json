@@ -1,0 +1,21 @@
+{
+  "name": "webserver",
+  "version": "1.0.0",
+  "description": "Web server for client control",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build": "echo 'No build step required'",
+    "vercel-build": "echo 'No build step required'"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
+} 
