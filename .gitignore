@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+vcpkg/
+build/
+vs_build/
+
+# Visual Studio files
+*.exe
+*.dll
+*.pdb
+*.obj
+*.ilk
+*.exp
+*.lib
+*.suo
+*.user
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+.vs/
+svc3/
+deps/
+
+# Build files
+build.bat
+build_svc3.bat
+build_vs.bat
+prepare_vs_build.bat
+install_deps.bat
+setup.bat
+CMakeLists.txt
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+client.py
+
+# Environment
+.env
+.env.local
+
+# Logs
+logs/
+*.log
+npm-debug.log* 
